@@ -1,12 +1,12 @@
 [submodule "src/isl"]
 	path = src/isl
-	url = git://repo.or.cz/isl.git
+	url = https://github.com/Meinersbur/isl.git
 [submodule "src/pet"]
 	path = src/pet
-	url = git://repo.or.cz/pet.git
+	url = https://github.com/Meinersbur/pet.git
 [submodule "src/cJSON"]
 	path = src/cJSON
 	url = https://github.com/DaveGamble/cJSON.git
 [submodule "src/barvinok"]
 	path = src/barvinok
-	url = https://repo.or.cz/barvinok.git
+	url = https://github.com/inducer/barvinok.git
