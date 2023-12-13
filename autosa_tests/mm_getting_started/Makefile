@@ -1,11 +1,16 @@
+# 
+# Compatible: Vitis 2022.2
+# nguyencanhtrung@me.com 
+#
 VPP := $(XILINX_VITIS)/bin/v++
+CXX := g++
 EMCONFIGUTIL := $(XILINX_VITIS)/bin/emconfigutil
 MODE := hw
 
 #PLATFORM := xilinx_u250_gen3x16_xdma_4_1_202210_1
 PLATFORM := xilinx_u200_gen3x16_xdma_2_202110_1
 
-
+VITIS_HLS := /opt/Xilinx/Vitis_HLS/2022.2
 
 # sources
 KERNEL_SRC := src/kernel_kernel.cpp
@@ -22,8 +27,23 @@ EMCONFIG_FILE := emconfig.json
 VPP_LINK_OPTS := --config connectivity.cfg
 
 VPP_COMMON_OPTS := -s -t $(MODE) --platform $(PLATFORM) -R2 -O3 --kernel_frequency 250 --vivado.prop=run.impl_1.STRATEGY=Performance_EarlyBlockPlacement
-CFLAGS := -g -std=c++11 -I$(XILINX_XRT)/include
-LFLAGS := -L$(XILINX_XRT)/lib -lxilinxopencl -lpthread -lrt
+
+
+###################################################################
+# G++ COMPILER FLAGS
+###################################################################
+host_CXXFLAGS += -g -std=c++11 -I$(XILINX_XRT)/include -I$(VITIS_HLS)/include
+xrt_LDFLAGS += -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread
+CXXFLAGS += $(host_CXXFLAGS)
+LDFLAGS += $(xrt_LDFLAGS)
+
+# Host compiler global settings
+CXXFLAGS += -fmessage-length=0
+LDFLAGS += -lrt -lstdc++
+###################################################################
+# END G++ COMPILER FLAGS
+###################################################################
+
 NUMDEVICES := 1
 
 # run time args
@@ -51,7 +71,7 @@ $(XCLBIN): $(XOS)
 
 # host rules
 $(HOST_EXE): $(HOST_SRC)
-	g++ $(CFLAGS) -o $@ $+ $(LFLAGS)
+	$(CXX) $(CXXFLAGS) -o $@ $+ $(LDFLAGS)
 	@echo 'Compiled Host Executable: $(HOST_EXE)'
 
 $(EMCONFIG_FILE):
