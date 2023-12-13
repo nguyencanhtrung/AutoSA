@@ -10,7 +10,8 @@
 // Modified By   : Nguyen Canh Trung
 // 
 // Description: 
-// 
+//      Modify the host code based on:
+//      https://github.com/nguyencanhtrung/vitis-practice/blob/master/Feature_Tutorials/01-rtl_kernel_workflow/reference-files/src/host/xrt-host.cpp
 // HISTORY:
 // Date      	By	Comments
 // ----------	---	---------------------------------------------------------
