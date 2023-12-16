@@ -1,0 +1,41 @@
+# ----------------------------------------------------------------------------
+# 
+# Project   : 
+# Filename  : Makefile
+# 
+# Author    : Nguyen Canh Trung
+# Email     : nguyencanhtrung 'at' me 'dot' com
+# Date      : 2023-12-15 16:13:21
+# Last Modified : 2023-12-16 10:50:51
+# Modified By   : Nguyen Canh Trung
+# 
+# Description: 
+# 		Makefile for AutoSA flow
+# HISTORY:
+# Date      	By	Comments
+# ----------	---	---------------------------------------------------------
+# 2023-12-16	NCT	File created.
+# ----------------------------------------------------------------------------
+# Makefile for AutoSA flow
+CC := autosa
+
+.PHONY: help
+
+help: 						# Show help for each of the Makefile recipes.
+	@grep -E '^[a-zA-Z0-9 -]+:.*#' Makefile | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:\n\t$$(echo $$l | cut -f 2- -d'#')\n"; done
+
+# package and repos
+install-deps:
+	sudo apt update
+	sudo apt install automake autoconf libtool pkg-config libgmp3-dev libyaml-dev libclang-dev llvm
+
+install-ntl:
+	wget https://libntl.org/ntl-11.5.1.tar.gz -O ntl-11.5.1.tar.gz
+	gunzip ntl-11.5.1.tar.gz
+	tar xf ntl-11.5.1.tar
+	cd ntl-11.5.1/src && ./configure NTL_GMP_LIP=on && make && sudo make install
+	rm -rf ntl-11.5.1.tar.gz ntl-11.5.1.tar ntl-11.5.1
+
+first_install: install-deps install-ntl  	# The first installation: all dependencies and generate executable autosa
+	./install.sh
+	cp autosa /usr/local/bin/
