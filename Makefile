@@ -44,7 +44,7 @@ install-ntl:
 
 first_install: install-deps install-ntl  	# The first installation: all dependencies and generate executable autosa
 	./install.sh
-	cp autosa /usr/local/bin/
+	sudo cp autosa /usr/local/bin/
 
 autosa: 					# Generate executable autosa
 	./install.sh	
