@@ -19,6 +19,12 @@
 # Makefile for AutoSA flow
 CC := autosa
 
+DIR_SRC := $(shell pwd)/autosa_tests
+CONFIG 	:= $(shell pwd)/autosa_config/autosa_config.json
+SIMD_INFO := $(shell pwd)/autosa_tests/mm/simd_info.json
+DIR_OUTPUT 	:= $(shell pwd)/autosa.tmp
+TARGET  := autosa_hls_c
+
 .PHONY: help
 
 help: 						# Show help for each of the Makefile recipes.
@@ -39,3 +45,16 @@ install-ntl:
 first_install: install-deps install-ntl  	# The first installation: all dependencies and generate executable autosa
 	./install.sh
 	cp autosa /usr/local/bin/
+
+autosa: 					# Generate executable autosa
+	./install.sh	
+
+gstt: 						# Running getting started example
+	@mkdir -p $(DIR_OUTPUT)/$@
+	$(CC) $(DIR_SRC))/mm_getting_started/kernel.c \
+	--config=$(CONFIG) \
+	--target=$(TARGET) \
+	--output-dir=$(DIR_OUTPUT)/$@ \
+	--sa-sizes="{kernel[]->space_time[3];kernel[]->array_part[16,16,16];kernel[]->latency[8,8];kernel[]->simd[2]}" \
+	--simd-info=$(SIMD_INFO) \
+	--host-serialize
