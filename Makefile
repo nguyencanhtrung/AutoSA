@@ -20,6 +20,7 @@
 CC := autosa
 
 DIR_SRC := $(shell pwd)/autosa_tests
+DIR_SCRIPTS := $(shell pwd)/autosa_scripts/vitis_scripts
 CONFIG 	:= $(shell pwd)/autosa_config/autosa_config.json
 SIMD_INFO := $(shell pwd)/autosa_tests/mm/simd_info.json
 DIR_OUTPUT 	:= $(shell pwd)/autosa.tmp
@@ -44,17 +45,42 @@ install-ntl:
 
 first_install: install-deps install-ntl  	# The first installation: all dependencies and generate executable autosa
 	./install.sh
-	sudo cp autosa /usr/local/bin/
+	sudo cp -f autosa /usr/local/bin/
 
 autosa: 					# Generate executable autosa
 	./install.sh	
+	sudo cp -f autosa /usr/local/bin/
 
 gstt: 						# Running getting started example
-	@mkdir -p $(DIR_OUTPUT)/$@
-	$(CC) $(DIR_SRC))/mm_getting_started/kernel.c \
+	@mkdir -p $(DIR_OUTPUT)/$@/src
+	@mkdir -p $(DIR_OUTPUT)/$@/latency_est
+	@mkdir -p $(DIR_OUTPUT)/$@/resource_est
+	@mkdir -p $(DIR_OUTPUT)/$@/tuning
+	$(CC) $(DIR_SRC)/mm_getting_started/kernel.c \
 	--config=$(CONFIG) \
 	--target=$(TARGET) \
 	--output-dir=$(DIR_OUTPUT)/$@ \
 	--sa-sizes="{kernel[]->space_time[3];kernel[]->array_part[16,16,16];kernel[]->latency[8,8];kernel[]->simd[2]}" \
 	--simd-info=$(SIMD_INFO) \
 	--host-serialize
+	@cp $(DIR_SCRIPTS)/Makefile $(DIR_OUTPUT)/$@/
+	@cp $(DIR_SCRIPTS)/connectivity.cfg $(DIR_OUTPUT)/$@/
+	@echo "HLS generation completed!"
+	cd $(DIR_OUTPUT)/$@/
+
+cgemm: 						# Running cgemm example
+	@mkdir -p $(DIR_OUTPUT)/$@/src
+	@mkdir -p $(DIR_OUTPUT)/$@/latency_est
+	@mkdir -p $(DIR_OUTPUT)/$@/resource_est
+	@mkdir -p $(DIR_OUTPUT)/$@/tuning
+	$(CC) $(DIR_SRC)/cgemm/kernel.c \
+	--config=$(CONFIG) \
+	--target=$(TARGET) \
+	--output-dir=$(DIR_OUTPUT)/$@ \
+	--sa-sizes="{kernel[]->space_time[3];kernel[]->array_part[16,16,16];kernel[]->latency[8,8];kernel[]->simd[2]}" \
+	--simd-info=$(SIMD_INFO) \
+	--host-serialize
+	@cp $(DIR_SCRIPTS)/Makefile $(DIR_OUTPUT)/$@/
+	@cp $(DIR_SRC)/$@/connectivity.cfg $(DIR_OUTPUT)/$@/
+	@echo "HLS generation completed!"
+	cd $(DIR_OUTPUT)/$@/
