@@ -35,6 +35,9 @@ help: 						# Show help for each of the Makefile recipes.
 install-deps:
 	sudo apt update
 	sudo apt install automake autoconf libtool pkg-config libgmp3-dev libyaml-dev libclang-dev llvm
+	sudo apt-get install ocl-icd-libopencl1
+	sudo apt-get install opencl-headers
+	sudo apt-get install ocl-icd-opencl-dev
 
 install-ntl:
 	wget https://libntl.org/ntl-11.5.1.tar.gz -O ntl-11.5.1.tar.gz
