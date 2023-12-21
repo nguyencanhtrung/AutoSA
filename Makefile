@@ -24,12 +24,13 @@ DIR_SCRIPTS := $(shell pwd)/autosa_scripts/vitis_scripts
 CONFIG 	:= $(shell pwd)/autosa_config/autosa_config.json
 SIMD_INFO := $(shell pwd)/autosa_tests/mm/simd_info.json
 DIR_OUTPUT 	:= $(shell pwd)/autosa.tmp
+# autosa_catapult_c | autosa_hls_c
 TARGET  := autosa_hls_c
 
 .PHONY: help
 
-help: 						# Show help for each of the Makefile recipes.
-	@grep -E '^[a-zA-Z0-9 -]+:.*#' Makefile | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:\n\t$$(echo $$l | cut -f 2- -d'#')\n"; done
+help: 						# Show help for each of the Makefile recipes
+	@grep -E '^[a-zA-Z0-9 -_]+:.*#' Makefile | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:\n\t$$(echo $$l | cut -f 2- -d'#')\n"; done
 
 # package and repos
 install-deps:
@@ -50,10 +51,11 @@ first_install: install-deps install-ntl  	# The first installation: all dependen
 	./install.sh
 	sudo cp -f autosa /usr/local/bin/
 
-autosa: 					# Generate executable autosa
+autosa: 					# Re-generate executable autosa 
 	./install.sh	
 	sudo cp -f autosa /usr/local/bin/
 
+# HLS code generation
 gstt: 						# Running getting started example
 	@mkdir -p $(DIR_OUTPUT)/$@/src
 	@mkdir -p $(DIR_OUTPUT)/$@/latency_est
@@ -87,3 +89,31 @@ cgemm: 						# Running cgemm example
 	@cp $(DIR_SRC)/$@/connectivity.cfg $(DIR_OUTPUT)/$@/
 	@echo "HLS generation completed!"
 	cd $(DIR_OUTPUT)/$@/
+
+mm_catapult: 				# Running catapult example
+	@mkdir -p $(DIR_OUTPUT)/$@/src
+	@mkdir -p $(DIR_OUTPUT)/$@/latency_est
+	@mkdir -p $(DIR_OUTPUT)/$@/resource_est
+	@mkdir -p $(DIR_OUTPUT)/$@/tuning
+	$(CC) $(DIR_SRC)/$@/kernel.c \
+	--config=$(CONFIG) \
+	--target=autosa_catapult_c \
+	--output-dir=$(DIR_OUTPUT)/$@ \
+	--sa-sizes="{kernel[]->space_time[3];kernel[]->array_part[16,16,16];kernel[]->latency[8,8];kernel[]->simd[2]}" \
+	--simd-info=$(SIMD_INFO) \
+	--host-serialize
+
+SRC_GSTT := $(DIR_OUTPUT)/gstt/src/kernel_kernel.cpp
+SRC_CGEMM := $(DIR_OUTPUT)/cgemm/src/kernel_kernel.cpp
+
+# XCLBIN generation
+gstt_bin: $(SRC_GSTT) 			# Generate XCLBIN for getting started example MODE = hw_emu
+	make -C $(DIR_OUTPUT)/gstt/ all MODE=hw_emu HOST=opencl
+
+cgemm_bin: $(SRC_CGEMM) 		# Generate XCLBIN for cgemm example MODE = hw_emu
+	make -C $(DIR_OUTPUT)/cgemm/ all MODE=hw_emu HOST=opencl
+
+
+# RTL IP generation with Catapult HLS
+mm_catapult_rtl: $(DIR_OUTPUT)/mm_catapult/src/kernel_kernel_hw.h 		# Generate RTL IP with catapult HLS
+	cd $(DIR_OUTPUT)/mm_catapult/src && catapult -shell -file ./kernel_directives.tcl
