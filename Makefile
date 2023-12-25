@@ -27,6 +27,9 @@ DIR_OUTPUT 	:= $(shell pwd)/autosa.tmp
 # autosa_catapult_c | autosa_hls_c
 TARGET  := autosa_hls_c
 
+DEV=mqnic0
+PCI_ID=$(subst ../,,$(shell readlink /sys/class/misc/$(DEV)/device))
+
 .PHONY: help
 
 help: 						# Show help for each of the Makefile recipes
@@ -117,3 +120,11 @@ cgemm_bin: $(SRC_CGEMM) 		# Generate XCLBIN for cgemm example MODE = hw_emu
 # RTL IP generation with Catapult HLS
 mm_catapult_rtl: $(DIR_OUTPUT)/mm_catapult/src/kernel_kernel_hw.h 		# Generate RTL IP with catapult HLS
 	cd $(DIR_OUTPUT)/mm_catapult/src && catapult -shell -file ./kernel_directives.tcl
+
+
+
+reset_all: 						# Reset all PCIe devices
+	sudo sh -c "lspci -d 10ee:5000 | cut -d ' ' -f 1 | xargs -L 1 ./pcie_hot_reset.sh"
+
+reset_dev: 						# Reset card with PCI_ID
+	sudo ./pcie_hot_reset.sh $(PCI_ID)
