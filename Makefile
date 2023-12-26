@@ -52,6 +52,7 @@ install-ntl:
 
 first_install: install-deps install-ntl  	# The first installation: all dependencies and generate executable autosa
 	./install.sh
+	mkdir autosa.tmp && cd autosa.tmp && mkdir output optimizer && cd output && mkdir src latency_est resource_est tuning
 	sudo cp -f autosa /usr/local/bin/
 
 autosa: 					# Re-generate executable autosa 
