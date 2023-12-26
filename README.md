@@ -2,6 +2,79 @@
   <img src=".github/autosa_logo.png", width="200">
 </div>
 
+# Introduction
+
+This repository is a fork of the AutoSA project originally developed by the University of California, Los Angeles (UCLA). A fork, in the context of GitHub, is a copy of a repository that allows you to experiment with changes without affecting the original project. 
+
+AutoSA, or Polyhedral-Based Systolic Array Auto-Compilation, is a compiler that transforms high-level programming languages (specifically C) into systolic array architecture. It leverages the polyhedral model to perform a series of transformations and architecture optimizations, outputting high-level synthesis C (HLS C) code.
+
+<strong>What's changes?</strong>
+
+* URLs of `pet`, `isl` and `barvinok`
+* Support Vitis 2022.2 with new platforms for Alveo U200 and U250
+* Support Catapult HLS 2023.2 (synthesizable but still not able to simulate - C and CoSim)
+* No change at autosa generator, just modify the generated output directly
+
+
+# Installation (new)
+
+Compile the source code and generate executable file `autosa`.
+
+```bash
+make first_install
+```
+
+If you want to modify `autosa` generator, run
+
+```bash
+make autosa
+```
+
+to re-compile and generate new executable file.
+
+
+## Running `Getting started example`
+
+
+```bash
+make gstt 
+```
+
+The above command generates
+
+* HLS code which describes the FPGA kernel
+* Host code which uses OpenCL APIs to interract with FPGA kernel
+
+### Running HW emulation
+
+```bash
+cd autosa.tmp/gstt
+make all MODE=hw_emu HOST=opencl
+```
+
+This command will create Vitis project and generate `*.xclbin` (FPGA image - in hardware emulation mode) and `host.exe` (host application). Run emulation with
+
+```bash
+make check MODE=hw_emu
+```
+
+There is an example of host code using XRT native APIs instead of OpenCL APIs, at `autosa_tests/mm_getting_started/src_xrtnative/kernel_host.cpp`. At this stage, it is written mannually and not supported by `autosa generator` yet. Compiling the XRT-native host code by:
+
+```bash
+make app HOST=xrt
+```
+
+#### Running onboard
+
+```bash
+make all MODE=hw HOST=opencl
+make check MODE=hw
+```
+
+It takes serveral hours to generate `*.xclbin`
+
+---
+
 # AutoSA: Polyhedral-Based Systolic Array Auto-Compilation
 
 [Documentation](https://autosa.readthedocs.io/en/latest/) |
